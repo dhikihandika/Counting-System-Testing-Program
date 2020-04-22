@@ -598,11 +598,8 @@ void showData(){
 //==================================================|     Procedure error data        |=====================================================//                                         
 //==========================================================================================================================================//
 void errorData(){
-  if((millis() - currentMillis_errorData)>=5000){
-    currentMillis_errorData = millis();
-    errorCheck_S1++;
-    errorCheck_S2++;
-  }
+  if(trig_publishFlagRestart == true){
+
   if(errorCheck_S1 == 3){
     status_S1 = 1;
     errorCheck_S1 = 0;
@@ -638,6 +635,47 @@ void errorData(){
     Serial.println(" ");
   }
 }
+}
+//  if((millis() - currentMillis_errorData)>=5000){
+//    currentMillis_errorData = millis();
+//    errorCheck_S1++;
+//    errorCheck_S2++;
+//  }
+//  if(errorCheck_S1 == 3){
+//    status_S1 = 1;
+//    errorCheck_S1 = 0;
+//    Serial.println("=========================");
+//    Serial.println("        ERROR !!!        ");
+//    Serial.print("status S1= ");Serial.println(status_S1); 
+//    // Publish Data
+//    if(replySubscribe){
+//       publishData_S1();
+//    } else {
+//      #ifdef DEBUG
+//      Serial.println("Not reply anyone data !!!");
+//      #endif // DEBUG
+//    } 
+//    Serial.println("=========================");
+//    Serial.println(" ");
+//  }
+//  if(errorCheck_S2 == 3){
+//    status_S2 = 1;
+//    errorCheck_S2 = 0;
+//    Serial.println("=========================");
+//    Serial.println("        ERROR !!!        ");
+//    Serial.print("status S2= ");Serial.println(status_S2); 
+//    // Publish Data
+//    if(replySubscribe){
+//       publishData_S2();
+//    } else {
+//      #ifdef DEBUG
+//      Serial.println("Not reply anyone data !!!");
+//      #endif // DEBUG
+//    } 
+//    Serial.println("=========================");
+//    Serial.println(" ");
+//  }
+//}
 
 //==========================================================================================================================================//
 //================================================|    Procedure lcd Get RealTimeClock   |==================================================//                                         
@@ -749,8 +787,8 @@ void loop(){
 //==========================================================================================================================================//
 void executeFlagrestart(){
   if(digitalRead(EMG_BUTTON == LOW)){
-    errorCheck_S1+2;
-    errorCheck_S2+2;
+    errorCheck_S1 = 3;
+    errorCheck_S2 = 3;
 
     digitalWrite(EMG_LED, HIGH);
     trig_publishFlagRestart = true;
