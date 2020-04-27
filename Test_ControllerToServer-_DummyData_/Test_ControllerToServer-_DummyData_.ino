@@ -1,4 +1,4 @@
-/*
+                                                                                                                                                 /*
 Author  : dhikihandika
 Date    : 18/03/2020
 */
@@ -29,10 +29,10 @@ RTC_DS1307 RTC;                                     // Define type RTC as RTC_DS
 
 /* configur etheret communication */
 byte mac[]  = {0xDE, 0xED, 0xBA, 0xFE, 0xFE, 0xED };                // MAC Address by see sticker on Arduino Etherent Shield or self determine
-IPAddress ip(192, 168, 12, 120);                                     // IP ethernet shield assigned, in one class over the server
+IPAddress ip(192, 168, 12, 120);                                    // IP ethernet shield assigned, in one class over the server
 IPAddress server(192, 168, 12, 12);                                 // IP LAN (Set ststic IP in PC/Server)
-// IPAddress ip(192, 168, 50, 8);                                     // IP ethernet shield assigned, in one class over the server
-// IPAddress server(192, 168, 50, 7);                                 // IP LAN (Set ststic IP in PC/Server)
+// IPAddress ip(192, 168, 50, 8);                                   // IP ethernet shield assigned, in one class over the server
+// IPAddress server(192, 168, 50, 7);                               // IP LAN (Set ststic IP in PC/Server)
 int portServer = 1883;                                              // Determine portServer MQTT connection
 
 EthernetClient ethClient;                                           // Instance of EthernetClient is a etcClient
@@ -56,12 +56,12 @@ uint32_t lastData_S1 = 0;
 uint32_t lastData_S2 = 0;
 
 /* variable incoming data (current data) */
-uint32_t data_S1 = 0;
-uint32_t data_S2 = 0;
+uint32_t data_S1 = 111;
+uint32_t data_S2 = 222;
 
 /* variable data publish */
-uint32_t countData_S1 = 0;
-uint32_t countData_S2 = 0;
+uint32_t countData_S1 = 1;
+uint32_t countData_S2 = 1;
 
 /* variable status sensor */
 int status_S1 = 0;
@@ -129,15 +129,14 @@ void reconnect(){
       Serial.println("--------------------------------------------");
       Serial.println("");
       #endif
+      } else {
+        #ifdef DEBUG
+        Serial.print("failed, rc=");
+        Serial.print(client.state());
+        Serial.println("try again 5 second");
+        #endif
+        delay(2000);
       }
-    }
-    else{
-      #ifdef DEBUG
-      Serial.print("failed, rc=");
-      Serial.print(client.state());
-      Serial.println("try again 5 second");
-      #endif
-      delay(2000);
     }
   }
 }
@@ -173,17 +172,6 @@ const size_t BUFFER_SIZE = JSON_OBJECT_SIZE(7);                                 
   JSONencoder["status"] = status_S1;                                                    // key/object its = status
   JSONencoder["temp_data"] = data_S1;                                                   // key/object its = temp_data
   JSONencoder["flagsensor"] = 1;                                                        // key/object its = limit
-
-  /* when use dummy data publish */
-  // JSONencoder["id_controller"] = "CTR01";                                            // key/object its = id_controller
-  // JSONencoder["id_machine"] = "MAC01_01";                                            // key/object its = id_machine
-  // JSONencoder["date"] = "2020-02-02";
-  // JSONencoder["clock"] = "02:02";
-  // JSONencoder["time"] = "2020-02-02 02:02";
-  // JSONencoder["count"] = 12;                                                         // key/object its = count
-  // JSONencoder["length"] = 602.88;                                                    // key/object its = length for debbuging
-  // JSONencoder["status"] = 0;                                                         // key/object its = status
-  // JSONencoder["flagsensor"] = 1;                                                     // key/object its = limit
 
   char JSONmessageBuffer[500];                                                          // array of char JSONmessageBuffer is 500
   JSONencoder.printTo(JSONmessageBuffer, sizeof(JSONmessageBuffer));                    // “minified” a JSON document
@@ -245,7 +233,6 @@ const size_t BUFFER_SIZE = JSON_OBJECT_SIZE(7);                                 
   Serial.println(JSONmessageBuffer);                                                    // line debugging
   #endif
 
- 
   client.publish("PSI/countingbenang/datacollector/reportdata", JSONmessageBuffer);     // publish payload to broker <=> client.publish(topic, payload);
 
   /* error correction */
@@ -382,23 +369,39 @@ void callback(char* topic, byte* payload, unsigned int length) {
 void sendCommand(){
     currentMillis = millis();
     if(currentMillis - previousMillis == timer1){
+        // Publish Data
+      if(replySubscribe){
+         publishData_S1();
+      } else {
         #ifdef DEBUG
-        Serial.println("");
-        Serial.println("---------------------------------------------------------------");  
-        Serial.println("Send command to sensor module 1 (TX3)");
-        Serial.println("");
+        Serial.println("Not reply anyone data !!!");
         #endif // DEBUG
-        Serial3.print("S_1\n");
+      } 
+
+      #ifdef DEBUG
+      Serial.print("data_S1= ");Serial.print(data_S1); 
+      Serial.print(" | status S1= ");Serial.println(status_S1); 
+      Serial.println("------------------------------||-------------------------------\n");                                                  
+      #endif //DEBUG
+      } 
     } else {
         if(currentMillis - previousMillis == timer2){
            previousMillis = currentMillis;  
+            // Publish Data
+            if(replySubscribe){
+                publishData_S2();
+            } else {
+                #ifdef DEBUG
+                Serial.println("Not reply anyone data !!!");
+                #endif // DEBUG
+            } 
+
             #ifdef DEBUG
-            Serial.println("");
-            Serial.println("---------------------------------------------------------------");  
-            Serial.println("Send command to sensor module 2 (TX3)");
-            Serial.println("");
-            #endif // DEBUG
-            Serial3.print("S_2\n");
+            Serial.print("data_S2= ");Serial.print(data_S2); 
+            Serial.print(" | status S2= ");Serial.println(status_S2); 
+            Serial.println("------------------------------||-------------------------------\n");                                                  
+            #endif //DEBUG
+            } 
         } 
     }
 }
@@ -498,8 +501,6 @@ void loop(){
     digitalWrite(EMG_LED, LOW);
     syncDataTimeRTC();
     sendCommand();
-    showData();
-    errorData();
     if(trig_publishFlagRestart){
        trig_publishFlagRestart = false;
         publishFlagRestart();
