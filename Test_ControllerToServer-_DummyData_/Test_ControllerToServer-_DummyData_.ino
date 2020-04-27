@@ -1,5 +1,10 @@
+<<<<<<< HEAD
                                                                                                                                                  /*
 Author  : dhikihandika
+=======
+ /*
+Author  : namirafathani
+>>>>>>> fd01bf6c7d03e5a0f7879c187bd3c027138458be
 Date    : 18/03/2020
 */
 
@@ -29,10 +34,17 @@ RTC_DS1307 RTC;                                     // Define type RTC as RTC_DS
 
 /* configur etheret communication */
 byte mac[]  = {0xDE, 0xED, 0xBA, 0xFE, 0xFE, 0xED };                // MAC Address by see sticker on Arduino Etherent Shield or self determine
+<<<<<<< HEAD
 IPAddress ip(192, 168, 12, 120);                                    // IP ethernet shield assigned, in one class over the server
 IPAddress server(192, 168, 12, 12);                                 // IP LAN (Set ststic IP in PC/Server)
 // IPAddress ip(192, 168, 50, 8);                                   // IP ethernet shield assigned, in one class over the server
 // IPAddress server(192, 168, 50, 7);                               // IP LAN (Set ststic IP in PC/Server)
+=======
+IPAddress ip(192, 168, 0, 110);                                     // IP ethernet shield assigned, in one class over the server
+IPAddress server(192, 168, 0, 106);                                 // IP LAN (Set ststic IP in PC/Server)
+// IPAddress ip(192, 168, 50, 8);                                     // IP ethernet shield assigned, in one class over the server
+// IPAddress server(192, 168, 50, 7);                                 // IP LAN (Set ststic IP in PC/Server)
+>>>>>>> fd01bf6c7d03e5a0f7879c187bd3c027138458be
 int portServer = 1883;                                              // Determine portServer MQTT connection
 
 EthernetClient ethClient;                                           // Instance of EthernetClient is a etcClient
@@ -152,7 +164,7 @@ void publishData_S1(){
   Serial.println(data_S1);                                                              // line debugging
   #endif
 
-  RTCprint();                                                                           // Call procedure sync time RTC
+  //RTCprint();                                                                           // Call procedure sync time RTC
 
 /* ArduinoJson create jsonDoc 
 Must be know its have a different function 
@@ -186,6 +198,7 @@ const size_t BUFFER_SIZE = JSON_OBJECT_SIZE(7);                                 
   /* error correction */
   if(client.publish("PSI/countingbenang/datacollector/reportdata", JSONmessageBuffer) == true){
     lastData_S1 = (data_S1 + serverLastData_S1) - (1 + serverLastData_S1);
+    digitalWrite(COM1, LOW);
     #ifdef DEBUG
     Serial.println("SUCCESS PUBLISHING PAYLOAD");
     #endif
@@ -204,7 +217,7 @@ void publishData_S2(){
   Serial.println(data_S2);                                                              // line debugging
   #endif
 
-  RTCprint();                                                                           // Call procedure sync time RTC
+ // RTCprint();                                                                           // Call procedure sync time RTC
 
 /* ArduinoJson create jsonDoc 
 Must be know its have a different function 
@@ -238,6 +251,7 @@ const size_t BUFFER_SIZE = JSON_OBJECT_SIZE(7);                                 
   /* error correction */
   if(client.publish("PSI/countingbenang/datacollector/reportdata", JSONmessageBuffer) == true){
     lastData_S2 = (data_S2 + serverLastData_S2) - (1 + serverLastData_S2);
+    digitalWrite(COM2, LOW);
     #ifdef DEBUG
     Serial.println("SUCCESS PUBLISHING PAYLOAD");
     #endif
@@ -323,7 +337,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
   String time = root["current_time"];
   int statusTime = root["flagtime"];
 
-  // Parse object JSON from subscribe data flagreply
+    // Parse object JSON from subscribe data flagreply
   int serverLastMAC01 = root["MAC01"]; 
   int serverLastMAC02 = root["MAC02"]; 
   int flagreply = root["flagreply"]; 
@@ -376,6 +390,7 @@ void sendCommand(){
         #ifdef DEBUG
         Serial.println("Not reply anyone data !!!");
         #endif // DEBUG
+<<<<<<< HEAD
       } 
 
       #ifdef DEBUG
@@ -384,6 +399,10 @@ void sendCommand(){
       Serial.println("------------------------------||-------------------------------\n");                                                  
       #endif //DEBUG
       } 
+=======
+        //Serial3.print("S_1\n");
+        prefix_A = true;
+>>>>>>> fd01bf6c7d03e5a0f7879c187bd3c027138458be
     } else {
         if(currentMillis - previousMillis == timer2){
            previousMillis = currentMillis;  
@@ -397,15 +416,294 @@ void sendCommand(){
             } 
 
             #ifdef DEBUG
+<<<<<<< HEAD
             Serial.print("data_S2= ");Serial.print(data_S2); 
             Serial.print(" | status S2= ");Serial.println(status_S2); 
             Serial.println("------------------------------||-------------------------------\n");                                                  
             #endif //DEBUG
             } 
+=======
+            Serial.println("");
+            Serial.println("---------------------------------------------------------------");  
+            Serial.println("Send command to sensor module 2 (TX3)");
+            Serial.println("");
+            #endif // DEBUG
+            //Serial3.print("S_2\n");
+            prefix_B = true;
+>>>>>>> fd01bf6c7d03e5a0f7879c187bd3c027138458be
         } 
     }
 }
 
+//==========================================================================================================================================//
+//======================================================|   Procedure to showDaota    |=====================================================//                                         
+//==========================================================================================================================================//
+void showData(){
+  /* variable diff data */
+  int diffData_S1 = 0;
+  int diffData_S2 = 0;
+
+  // Show data 1 for server without Serial3
+  if(prefix_A){
+    #ifdef DEBUG
+    Serial.println("Prefix_A --OK--");
+    Serial.print("data-incoming ");
+    #endif
+
+    digitalWrite(COM1, HIGH);
+    status_S1 = 0;
+    data_S1++;
+    Serial.println(data_S1);
+    errorCheck_S1 = 0; 
+    prefix_A = false;
+
+    // adding some program to generate error when emergency button is change
+
+    // processing data
+     if(diffData_S1<0){
+        countData_S1 = diffData_S1 + limitData; 
+      } else {
+        countData_S1 = diffData_S1;
+      }
+
+     // Publish Data
+      if(replySubscribe){
+         publishData_S1();
+      } else {
+        #ifdef DEBUG
+        Serial.println("Not reply anyone data !!!");
+        #endif // DEBUG
+      } 
+     #ifdef DEBUG
+      Serial.print("data S1= ");Serial.print(data_S1); 
+      Serial.print(" | status S1= ");Serial.println(status_S1); 
+      Serial.println("------------------------------||-------------------------------\n");                                              
+      #endif //DEBUG
+  }
+  else{
+    // show data for sensor 2
+    if(prefix_B){
+      #ifdef DEBUG
+      Serial.println("Prefix_B -- OK--");
+      Serial.print("data-incoming ");
+      #endif
+
+      digitalWrite(COM2, HIGH);
+      status_S2 = 0;
+      data_S2++;
+      Serial.println(data_S2);
+      errorCheck_S2 = 0;
+      prefix_B = false;
+
+      // Processing Data
+      diffData_S2 = (data_S2 + serverLastData_S2) - (lastData_S2 + serverLastData_S2);
+      if(diffData_S2<0){
+        countData_S2 = diffData_S2 + limitData; 
+      } else {
+        countData_S2 = diffData_S2;
+      }
+
+      // Publish Data
+      if(replySubscribe){
+         publishData_S2();
+      } else {
+        #ifdef DEBUG
+        Serial.println("Not reply anyone data !!!");
+        #endif // DEBUG
+      } 
+
+      #ifdef DEBUG
+      Serial.print("data_S2= ");Serial.print(data_S2); 
+      Serial.print(" | status S2= ");Serial.println(status_S2); 
+      Serial.println("------------------------------||-------------------------------\n");                                                  
+      #endif //DEBUG
+
+    }
+  }
+}
+
+  /* Show data for sensor 1 */
+//   if(prefix_A){
+//     if(stringComplete){
+//       #ifdef DEBUG
+//       Serial.println("Prefix_A --OK--");
+//       Serial.print("incomming data= ");Serial.print(incomingData);
+//       #endif
+
+//       digitalWrite(COM1, HIGH);
+//       status_S1 = 0;
+//       /* remove header and footer */
+//       first = incomingData.indexOf('A');                                         // determine indexOf 'A'
+//       last = incomingData.lastIndexOf('/n');                                     // determine lastInndexOf '\n
+
+//       /* Parse incoming data to particular variable */ 
+//       String datasensor1 = incomingData.substring(first, last);                  // substring 
+//       datasensor1.remove(0,1);                                                   // remove header incomming data
+//       datasensor1.remove(datasensor1.length()-1, datasensor1.length() - 0);      // remove fotter incomming data (/n)
+//       data_S1 = datasensor1.toInt();                                             // covert string to integer datasensor1 and save to 'data_S1'
+
+//       stringComplete = false;
+//       prefix_A = false;
+//       incomingData = "";
+
+//       //Processing Data
+//       diffData_S1 = (data_S1 + serverLastData_S1) - (lastData_S1 + serverLastData_S1);
+//       if(diffData_S1<0){
+//         countData_S1 = diffData_S1 + limitData; 
+//       } else {
+//         countData_S1 = diffData_S1;
+//       }
+
+//       // Publish Data
+//       if(replySubscribe){
+//          publishData_S1();
+//       } else {
+//         #ifdef DEBUG
+//         Serial.println("Not reply anyone data !!!");
+//         #endif // DEBUG
+//       } 
+
+//       #ifdef DEBUG
+//       Serial.print("data S1= ");Serial.print(data_S1); 
+//       Serial.print(" | status S1= ");Serial.println(status_S1); 
+//       Serial.println("------------------------------||-------------------------------\n");                                              
+//       #endif //DEBUG
+//       } 
+//   } else {
+//     /* Show data for sensor 2 */
+//     if(prefix_B){
+//       if(stringComplete){
+//       #ifdef DEBUG
+//       Serial.println("Prefix_B --OK--");
+//       Serial.print("incomming data= ");Serial.print(incomingData);
+//       #endif
+
+//       digitalWrite(COM2, HIGH);
+//       status_S2 = 0;
+//       first = incomingData.indexOf('B');                                         // determine indexOf 'A'
+//       last = incomingData.lastIndexOf('/n');                                     // determine lastInndexOf '\n
+//       /* When true value is 0 and false is "-1" */
+
+//       /* Parse incoming data to particular variable */ 
+//       String datasensor2 = incomingData.substring(first, last);                  // substring 
+//       datasensor2.remove(0,1);                                                   // remove header incomming data
+//       datasensor2.remove(datasensor2.length()-1, datasensor2.length() - 0);      // remove fotter incomming data (/n)
+//       data_S2 = datasensor2.toInt();                                             // covert string to integer datasensor1 and save to 'data_S1'
+
+//       stringComplete = false;
+//       prefix_B = false;
+//       incomingData = "";
+
+//       // Processing Data
+//       diffData_S2 = (data_S2 + serverLastData_S2) - (lastData_S2 + serverLastData_S2);
+//       if(diffData_S2<0){
+//         countData_S2 = diffData_S2 + limitData; 
+//       } else {
+//         countData_S2 = diffData_S2;
+//       }
+
+//       // Publish Data
+//       if(replySubscribe){
+//          publishData_S2();
+//       } else {
+//         #ifdef DEBUG
+//         Serial.println("Not reply anyone data !!!");
+//         #endif // DEBUG
+//       } 
+
+//       #ifdef DEBUG
+//       Serial.print("data_S2= ");Serial.print(data_S2); 
+//       Serial.print(" | status S2= ");Serial.println(status_S2); 
+//       Serial.println("------------------------------||-------------------------------\n");                                                  
+//       #endif //DEBUG
+//       } 
+//     } 
+//   }
+// }
+
+
+//==========================================================================================================================================//
+//==================================================|     Procedure error data        |=====================================================//                                         
+//==========================================================================================================================================//
+void errorData(){
+  if(trig_publishFlagRestart == true){
+
+  if(errorCheck_S1 == 3){
+    status_S1 = 1;
+    errorCheck_S1 = 0;
+    Serial.println("=========================");
+    Serial.println("        ERROR !!!        ");
+    Serial.print("status S1= ");Serial.println(status_S1); 
+    // Publish Data
+    if(replySubscribe){
+       publishData_S1();
+    } else {
+      #ifdef DEBUG
+      Serial.println("Not reply anyone data !!!");
+      #endif // DEBUG
+    } 
+    Serial.println("=========================");
+    Serial.println(" ");
+  }
+  if(errorCheck_S2 == 3){
+    status_S2 = 1;
+    errorCheck_S2 = 0;
+    Serial.println("=========================");
+    Serial.println("        ERROR !!!        ");
+    Serial.print("status S2= ");Serial.println(status_S2); 
+    // Publish Data
+    if(replySubscribe){
+       publishData_S2();
+    } else {
+      #ifdef DEBUG
+      Serial.println("Not reply anyone data !!!");
+      #endif // DEBUG
+    } 
+    Serial.println("=========================");
+    Serial.println(" ");
+  }
+}
+}
+//  if((millis() - currentMillis_errorData)>=5000){
+//    currentMillis_errorData = millis();
+//    errorCheck_S1++;
+//    errorCheck_S2++;
+//  }
+//  if(errorCheck_S1 == 3){
+//    status_S1 = 1;
+//    errorCheck_S1 = 0;
+//    Serial.println("=========================");
+//    Serial.println("        ERROR !!!        ");
+//    Serial.print("status S1= ");Serial.println(status_S1); 
+//    // Publish Data
+//    if(replySubscribe){
+//       publishData_S1();
+//    } else {
+//      #ifdef DEBUG
+//      Serial.println("Not reply anyone data !!!");
+//      #endif // DEBUG
+//    } 
+//    Serial.println("=========================");
+//    Serial.println(" ");
+//  }
+//  if(errorCheck_S2 == 3){
+//    status_S2 = 1;
+//    errorCheck_S2 = 0;
+//    Serial.println("=========================");
+//    Serial.println("        ERROR !!!        ");
+//    Serial.print("status S2= ");Serial.println(status_S2); 
+//    // Publish Data
+//    if(replySubscribe){
+//       publishData_S2();
+//    } else {
+//      #ifdef DEBUG
+//      Serial.println("Not reply anyone data !!!");
+//      #endif // DEBUG
+//    } 
+//    Serial.println("=========================");
+//    Serial.println(" ");
+//  }
+//}
 
 //==========================================================================================================================================//
 //================================================|    Procedure lcd Get RealTimeClock   |==================================================//                                         
@@ -494,6 +792,7 @@ void setup(){
 }
 
 
+
 //==========================================================================================================================================//
 //===========================================================|   Main Loop    |=============================================================//                                         
 //==========================================================================================================================================//
@@ -508,12 +807,53 @@ void loop(){
     client.loop();   // Use to loop callback function
 }
 
+
 //==========================================================================================================================================//
 //=========================================================|   Digital ISR    |=============================================================//                                         
 //==========================================================================================================================================//
 void executeFlagrestart(){
-  if(digitalRead(EMG_BUTTON) == LOW){
+  if(digitalRead(EMG_BUTTON == LOW)){
+    errorCheck_S1 = 3;
+    errorCheck_S2 = 3;
+
     digitalWrite(EMG_LED, HIGH);
     trig_publishFlagRestart = true;
+  }
+  
+  // if(digitalRead(EMG_BUTTON) == LOW){
+  //   digitalWrite(EMG_LED, HIGH);
+  //   trig_publishFlagRestart = true;
+  // }
+}
+
+//==========================================================================================================================================//
+//==========================================================|   Serial ISR    |=============================================================//                                         
+//==========================================================================================================================================//
+/*
+  SerialEvent occurs whenever a new data comes in the hardware serial RX. This
+  routine is run between each time loop() runs, so using delay inside loop can
+  delay response. Multiple bytes of data may be available.
+*/
+void serialEvent3(){
+  while (Serial3.available()){
+    // get the new byte:
+    char inChar = (char)Serial3.read();
+    // add it to the incomingData
+    // if the incoming character is a newline, set a flag so the main loop can
+    // do something about it:
+    incomingData += inChar;
+    if(inChar == 'A'){
+      prefix_A = true;
+      errorCheck_S1 = 0;
+    } else {
+      if(inChar == 'B'){
+      prefix_B = true;
+      errorCheck_S2 = 0;
+      } else {
+        if(inChar == '\n'){ 
+          stringComplete = true;
+        }
+      }
+    }
   }
 }
