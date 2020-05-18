@@ -30,8 +30,8 @@ RTC_DS1307 RTC;                                     // Define type RTC as RTC_DS
 
 /* configur etheret communication */
 byte mac[]  = {0xDE, 0xED, 0xBA, 0xFE, 0xFE, 0xED };                // MAC Address by see sticker on Arduino Etherent Shield or self determine
-IPAddress ip(192, 168, 12, 120);                                    // IP ethernet shield assigned, in one class over the server
-IPAddress server(192, 168, 12, 12);                                 // IP LAN (Set ststic IP in PC/Server)
+IPAddress ip(192, 168, 0, 120);                                    // IP ethernet shield assigned, in one class over the server
+IPAddress server(192, 168, 0, 180);                                 // IP LAN (Set ststic IP in PC/Server)
 // IPAddress ip(192, 168, 50, 8);                                   // IP ethernet shield assigned, in one class over the server
 // IPAddress server(192, 168, 50, 7);                               // IP LAN (Set ststic IP in PC/Server)
 int portServer = 1883;                                              // Determine portServer MQTT connection
@@ -642,7 +642,6 @@ void setup(){
 }
 
 
-
 //==========================================================================================================================================//
 //===========================================================|   Main Loop    |=============================================================//                                         
 //==========================================================================================================================================//
@@ -676,6 +675,7 @@ void executeFlagrestart(){
   // }
 }
 
+
 void executeFlagrestop(){
   if(digitalRead(STOP_ERROR == LOW)){
     errorCheck_S1 = 0;
@@ -684,6 +684,8 @@ void executeFlagrestop(){
     // trig_publishFlagRestart = true;
   }
 }
+
+
 //==========================================================================================================================================//
 //==========================================================|   Serial ISR    |=============================================================//                                         
 //==========================================================================================================================================//
