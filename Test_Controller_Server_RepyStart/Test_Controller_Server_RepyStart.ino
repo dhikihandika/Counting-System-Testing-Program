@@ -13,8 +13,8 @@ Date    : 13/05/2020
 #include <ArduinoJson.h>                                            // Add library arduino json 
 #include <PubSubClient.h>                                           // Add library PubSubClient MQTT
 
+// #define DEBUG
 
-#define DEBUG
 #define timer1 5000                                 // timer send command to sensor module 1
 #define timer2 10000                                // timer send command to sensor module 2
 #define EMG_BUTTON 2                                // define Emergency Button 
@@ -28,7 +28,7 @@ RTC_DS1307 RTC;                                     // Define type RTC as RTC_DS
 /* configur etheret communication */
 byte mac[]  = {0xDE, 0xED, 0xBA, 0xFE, 0xFE, 0xED };                // MAC Address by see sticker on Arduino Etherent Shield or self determine
 IPAddress ip(192, 168, 0, 192);                                    // IP ethernet shield assigned, in one class over the server
-IPAddress server(192, 168, 0, 188);                                 // IP LAN (Set ststic IP in PC/Server)
+IPAddress server(192, 168, 0, 180);                                 // IP LAN (Set ststic IP in PC/Server)
 // IPAddress ip(192, 168, 12, 188);                                   // IP ethernet shield assigned, in one class over the server
 // IPAddress server(192, 168, 12, 12);                               // IP LAN (Set ststic IP in PC/Server)
 int portServer = 1883;                                              // Determine portServer MQTT connection
@@ -241,7 +241,9 @@ const size_t BUFFER_SIZE = JSON_OBJECT_SIZE(7);                                 
 //==========================================================================================================================================//
 void publishFlagStart(){
     if(client.connect("ethernetClient")){
+      #ifdef DEBUG
       Serial.println("connected");
+      #endif
       // Publish variable startup system
       const size_t restart = JSON_OBJECT_SIZE(2);
       DynamicJsonBuffer jsonBuffer5(restart);
@@ -287,7 +289,6 @@ void publishFlagStart(){
 //==========================================================================================================================================//
 //=======================================================|   Procedure to showData    |=====================================================//                                         
 //==========================================================================================================================================//
-
 void showData(){  
   // Setting time must be add size 
   currentMillis = millis();
@@ -421,7 +422,7 @@ void setup(){
     /* Mode pin definition */
     pinMode(COM1, OUTPUT);
     pinMode(COM2, OUTPUT);
-     pinMode(COM3, OUTPUT);
+    pinMode(COM3, OUTPUT);
     
     /* Callibration RTC module with NTP Server */
     Wire.begin();

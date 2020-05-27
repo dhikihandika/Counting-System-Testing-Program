@@ -330,10 +330,6 @@ void loop(){
     sendCommand();
     showData();
     errorData();
-    if(trig_publishFlagRestart){
-       trig_publishFlagRestart = false;
-       Serial.println("Publish flagrestart !!!");
-    }
 }
 
 
